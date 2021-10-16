@@ -1,0 +1,72 @@
+Aplicatia este un client care primeste comenzi de la tastatura:
+    - register : se inregistreaza pe site
+    - login : se logheaza pe site
+    - enter_library : primeste acces in biblioteca
+    - get_books : obtine cartile din biblioteca
+    - get_book : obtine o carte din biblioteca
+    - add_book : adauga o carte in biblioteca
+    - delete_book : sterge o carte din biblioteca
+    - logout : se delogheaza de pe site
+    - exit : inchide Aplicatia
+Aceste comenzi asteapta si informatia necesara si daca e corecta, trimite
+catre server un mesaj de tip POST, GET, DELETE, apoi primind raspuns afiseaza
+eroarea sau salvez datele obtinute, afisez detaliile necesara.
+
+client.c :
+    get_ip - face o cerere dns pentu a afla ip-l serverului si-l returneaza/
+    main - afla ip-l serverului si ruleaza comenzi citite de la tastatura
+           pana primeste "exit".
+
+function.c : funtiile care le poate face clientul
+    fregister - asteapta username si password de la tastatura si apoi creeaza
+                un mesaj corespunzator, il trimite la server, primeste raspuns,
+                interpreteaza messajul de eroare.
+    login - asteapta username si password de la tastatura si apoi creeaza
+            un mesaj corespunzator, il trimite la server, primeste raspuns,
+            interpreteaza messajul succes(salveaza cookie de sesiune)/eroare.
+    add_book - asteapta title, author, genre, publisher, page_count de la
+               tastatura creeaza un mesaj corespunzator, il trimite la server,
+               primeste raspuns, interpreteaza messajul de eroare.
+    enter_library - creeaza un mesaj corespunzator, il trimite la server,
+                    primeste raspuns, interpreteaza messajul succes(salveaza
+                    accesul in biblioteca)/eroare.
+    get_books - creeaza un mesaj corespunzator, il trimite la server,
+                    primeste raspuns, interpreteaza mesajul, afiseaza
+                    detaliile depsre carti.
+    get_book - asteapta id-l cartii de la tastatura, creeaza mesajul
+                corespunzator, il trimite la server, primeste raspuns,
+                interpreteaza mesajul succes(afiseaza detaliile cartii)/eroare.
+    delete_book - asteapta id-l cartii de la tastatura, creeaza mesajul
+                  corespunzator, il trimite la server, primeste raspuns,
+                  interpreteaza mesajul de eroare.
+    logout - creeaza un mesaj corespunzator, il trimite la server, primeste
+             raspuns, interpreteaza mesajul eroare.
+
+message.c : creeaza, trimite, primeste message
+    create_message - creeaza un mesaj cu tip command (POST, GET, DELETE) pe un
+                     url al serverului, cu sesiune de logare/sau nu, sau cu
+                     acces la biblioteca/sau nu, cu data/ sau nu, in dependenta
+                     cum este apelata.
+    send_receive_message - deschide o conexiune catre server, trimite mesajul,
+                           primeste raspuns, daca e de eroare afiseaza eroarea,
+                           daca e de succes interpreteaza messajul pentru tipul
+                           functiei care a fost trimisa catre serve, in caz de
+                           login salveaza cookie de sesiune, in caz de enter
+                           library salveaza accesul la biblioteca.
+
+helpers.h : antetul funtiilor folosite.
+    DIE - folosit pentru erori al functiilor pe socket.
+
+helpers.c : interpreteaza json
+    print_books - afiseaza informatiile despre cartile primite de la server.
+    print_book - afiseaza informatia despre o carte primita de la server.
+    print_error - afiseaza eroare primita de la server.
+
+Mesajele de la get_book, get_books sau de eroare, le-am parsat folosind
+biblioteca parson si functiile json_parse_string pentru a obtine un JSON_Value,
+json_array_get_object pentru a obtine obiectul, json_object_get_string pentru
+a gasi valoarea cheilor(datelor), json_object_get_number pentru a gasi valoarea
+pentru page_count, json_value_get_array pentru a creea un array de json-uri,
+json_array_get_count pentru a sti dimensiunea array-lui, json_array_get_object
+pentru a obtine fiecare obiect din array, si json_value_free pentru a elibera
+memoria. Pentru mesajul de autorizatie am parsat manual.
